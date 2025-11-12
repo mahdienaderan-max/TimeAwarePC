@@ -58,8 +58,9 @@ def cfc_tpc(data,maxdelay=1,subsampsize=50,niter=25,alpha=0.1,thresh=0.25,isgaus
             d = {'print.me': 'print_dot_me', 'print_me': 'print_uscore_me'}
             kpcalg = importr('kpcalg', robject_translations = d)
             data_trans_pd=pd.DataFrame(data_trans[r_idx:(r_idx+subsampsize),:])
-            pandas2ri.activate()
-            df = robjects.conversion.py2rpy(data_trans_pd)
+            from rpy2.robjects.conversion import localconverter
+            with localconverter(robjects.default_converter + pandas2ri.converter):
+                df = robjects.conversion.py2rpy(data_trans_pd)
             base=importr("base")
             out=kpcalg.kpc(**{'suffStat' : rlc.TaggedList((df,"hsic.perm"),tags=('data','ic.method')),
             'indepTest' : kpcalg.kernelCItest,
